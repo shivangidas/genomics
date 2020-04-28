@@ -44,6 +44,20 @@ for i=1:6
 end
 length(ORFLength1)
 
+% % threshold can also be done for multiple permutaions.
+% ORFLength1=[];
+% maxOrfLength = [];
+% for k=1:100
+%     orf1= seqshoworfs(chimp(randperm(length(chimp))),'MINIMUMLENGTH',1,'geneticcode',2,'frames','all','nodisplay','true');
+%     for i=1:6
+%        for j=1:length(orf1(i).Stop)
+%         ORFLength1=[ORFLength1; orf1(i).Stop(j)+2 - orf1(i).Start(j)];
+%        end
+%     end
+%     maxOrfLength=[maxOrfLength;max(ORFLength1)];
+% end
+% max_threshold=max(maxOrfLength)
+
 max_threshold=max(ORFLength1)
 disp("Number of significant ORFs in chimpanzee mitochondrion")
 n_max=length(find(ORFLength>=max_threshold))
@@ -56,6 +70,7 @@ for i=1:6
         orfNew=[orfNew; orf_threshold(i).Stop(j)+2 - orf_threshold(i).Start(j)];
     end
 end
+
 
 %question9
 protein = chimp(orf_threshold(1).Start(1):orf_threshold(1).Stop(1)+2) %first ORF selected
@@ -104,7 +119,7 @@ hold off;
 p_value50 = length(find(globalscores >= sc50)) / 1000
 p_value30 = length(find(globalscores >= sc30)) / 1000
 
-%question 11 and 12
+% question 11
 h_orf = seqshoworfs(human,'MINIMUMLENGTH',1, 'geneticcode',2,'frames','all','nodisplay','true');
 h_orf1= seqshoworfs(human(randperm(length(human))),'MINIMUMLENGTH',1,'geneticcode',2,'frames','all','nodisplay','true');
 h_ORFLength=[];
@@ -162,7 +177,7 @@ end
 
 all_amino = [h_aminoacid;aminoacid];
 % length(all_amino)
-%exploring with multialign
+% exploring with multialign
 ma = multialign(char(all_amino(:,1)))
 seqalignviewer(ma)
 
@@ -176,16 +191,6 @@ end
 
 total_combinations = length(scores)
 
-for i=1: total_combinations
-    h = scores(i,1);
-    c = scores(tobetested(i),2);
-    human_protein = char(h_aminoacid(h,1));
-    chimp_protein = char(aminoacid(c,1));
-    [score1, alignment] = nwalign(human_protein, chimp_protein, ...
-            'scoringmatrix','blosum30','gapopen',5,'extendgap',5);
-     showalignment(alignment)
-     %alignment
-end
 %test with significance plot
 for i=1:total_combinations
     h = scores(i,1);
@@ -212,9 +217,62 @@ for i=1:total_combinations
              ') human and ORF(',aminoacid(c,2),':',aminoacid(c,3), ') chimpanzee');
         title(titleStr);
         hold off;
+        [score1, alignment] = nwalign(human_protein, chimp_protein, ...
+            'scoringmatrix','blosum30','gapopen',5,'extendgap',5);
+        showalignment(alignment)
         score
         p_value
         strcat('ORF in position(' ,h_aminoacid(h,2),':',h_aminoacid(h,3), ...
               ') in human is homologous to ORF in position (',aminoacid(c,2),':',aminoacid(c,3), ') in chimpanzee')
     end
 end
+
+% % Uncomment to run question 12
+% 
+% 
+% h_nt = h_protein;
+% c_nt = codons;
+% 
+% scoresNT = [];
+% for i=1: length(h_nt)
+%     for j=1:length(c_nt)
+%         scoresNT = [scoresNT; i,j,nwalign(char(h_nt(i,1)), char(c_nt(j,1)), 'scoringmatrix','blosum30','gapopen',5,'extendgap',5,'ALPHABET','NT')];
+%     end
+% end
+% 
+% total_combinations1 = length(scoresNT)
+% 
+% for i=1:total_combinations1
+%     h = scoresNT(i,1);
+%     c = scoresNT(i,2);
+%     scoreNT = scoresNT(i,3);
+%     human_NT = char(h_nt(h,1));
+%     chimp_NT = char(c_nt(c,1));
+%     n = 1000;
+%     globalscores = zeros(n,1);
+%     chimpLen = length(chimp_NT);
+%     for j = 1:n
+%         perm = randperm(chimpLen);
+%         globalscores(j) = nwalign(human_NT,chimp_NT(perm),'scoringmatrix','blosum30','gapopen',5,'extendgap',5,'ALPHABET','NT');
+%     end
+%     p_value = length(find(globalscores >= scoreNT)) / 1000;
+%     if (p_value < 0.01)
+%         figure
+%         buckets = ceil(n/5);
+%         hist(globalscores,buckets)
+%         hold on;
+%         stem(scoreNT,1,'k')
+%         xlabel('Score'); ylabel('Number of Sequences');
+%          titleStr = strcat('Significance plot for ORF(' ,h_nt(h,2),':',h_nt(h,3), ...
+%              ') human and ORF(',c_nt(c,2),':',c_nt(c,3), ') chimpanzee');
+%         title(titleStr);
+%         hold off;
+%         [score1, alignment] = nwalign(human_NT, chimp_NT, ...
+%             'scoringmatrix','blosum30','gapopen',5,'extendgap',5,'ALPHABET','NT');
+%         showalignment(alignment)
+%         scoreNT
+%         p_value
+%         strcat('ORF in position(' ,h_aminoacid(h,2),':',h_aminoacid(h,3), ...
+%               ') in human is homologous to ORF in position (',aminoacid(c,2),':',aminoacid(c,3), ') in chimpanzee')
+%     end
+% end
