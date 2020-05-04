@@ -182,6 +182,18 @@ rooted_tree = reroot(NJtree,sel);
 plot(rooted_tree,'orient','left');
 title('Consensus tree');
 
+%%
+wdistances_cytb_nt = seqpdist(cytb_nt_data,'method','jukes-cantor','ALPHABET','NT','PAIRWISEALIGNMENT',true);
+wdistances_cox1_nt = seqpdist(cox1_nt_data,'method','jukes-cantor','ALPHABET','NT','PAIRWISEALIGNMENT',true);
+
+weights = [sum(wdistances_cytb_nt) sum(wdistances_cox1_nt)];
+weights = weights / sum(weights);
+distances = wdistances_cytb_nt .* weights(1) + wdistances_cox1_nt .* weights(2);
+NJtree = seqneighjoin(distances,'equivar',cox1_nt_data);
+sel = getbyname(NJtree,'Papio cynocephalus');
+rooted_tree = reroot(NJtree,sel);
+plot(rooted_tree,'orient','left');
+title('Consensus tree NT');
 %% Not used, seqlinkage tree for cytb nt
 % envtree = seqlinkage(distances_cytb_nt,'UPGMA',cytb_nt_data)
 % %plot(envtree,'type','angular');
